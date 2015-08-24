@@ -1,0 +1,44 @@
+#!/usr/bin/php
+<?php
+
+// get
+$url = 'http://example.com/api/v1/componnts/13';
+/*
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$data = curl_exec($ch);
+echo $data;
+$info = curl_getinfo($ch);
+print_r($info);
+echo "\n";
+curl_close($ch);
+*/
+// json post
+$data        = ["name" => "Hagrid", "age" => "36"];
+$data_string = json_encode($data);
+$ch          = curl_init($url);
+//echo curl_errno($ch), "\n";
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json', 
+            'Content-Length: ' . strlen($data_string)]
+);
+$data = curl_exec($ch);
+echo $data;
+$info = curl_getinfo($ch);
+print_r($info);
+echo "\n";
+curl_close($ch);
+
+switch ($argv[1]) {
+    case 'ping':
+        break;
+    default:
+        $actions = ['ping'];
+        sort($actions);
+        echo 'Usage: {' . implode(', ', $actions) . '}', "\n";
+}
