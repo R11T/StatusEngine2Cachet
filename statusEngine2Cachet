@@ -1,21 +1,20 @@
 #!/usr/bin/php
 <?php
+/**
+ * @licence GPL-v2
+ * Summary :
+ * « You may copy, distribute and modify the software as long as
+ * you track changes/dates of in source files and keep all modifications under GPL.
+ * You can distribute your application using a GPL library commercially,
+ * but you must also disclose the source code. »
+ *
+ * @link https://www.tldrlegal.com/l/gpl2
+ * @see LICENSE file
+ */
 
 // get
-$url = 'http://example.com/api/v1/componnts/13';
-/*
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$data = curl_exec($ch);
-echo $data;
-$info = curl_getinfo($ch);
-print_r($info);
-echo "\n";
-curl_close($ch);
-*/
 // json post
+/*
 $data        = ["name" => "Hagrid", "age" => "36"];
 $data_string = json_encode($data);
 $ch          = curl_init($url);
@@ -33,12 +32,28 @@ $info = curl_getinfo($ch);
 print_r($info);
 echo "\n";
 curl_close($ch);
+*/
+$required = [
+    'Const.php',
+    'Vendor/autoload.php',
+];
 
-switch ($argv[1]) {
-    case 'ping':
-        break;
-    default:
-        $actions = ['ping'];
-        sort($actions);
-        echo 'Usage: {' . implode(', ', $actions) . '}', "\n";
+require 'dependencies.php';
+
+loadDependencies($required);
+
+try {
+    $request = new \App\Library\Io\Request($argv, $argc);
+    $app     = new \App\Library\App();
+    switch ($request->getAction()) {
+        case 'ping':
+            $app->ping();
+            break;
+        case 'help':
+        default:
+            echo 'help !', "\n";
+    }
+} catch (\Exception $e) {
+    echo $e->getMessage(), "\n";
+    exit(1);
 }

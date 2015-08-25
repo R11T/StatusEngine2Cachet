@@ -1,0 +1,17 @@
+{
+    "name": "R11T/StatusEngine2Cachet",
+    "authors": [
+        {
+            "name": "R11T"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "": "."
+        }
+    },
+    "config": {
+        "vendor-dir": "Vendor"
+    },
+    "require": {}
+}
