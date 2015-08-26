@@ -40,6 +40,12 @@ class File
         $this->path = $path;
     }
 
+
+    // ------
+    // Input
+    // ------
+
+
     /**
      * Get json data
      *
@@ -65,6 +71,48 @@ class File
     public function getAsString()
     {
         return is_file($this->path) ? file_get_contents($this->path) : '';
+    }
+
+
+    // --------
+    // Output
+    // --------
+
+
+    public function storeData(array $data)
+    {
+        $dataToStore = [];
+        $oldData     = $this->getJson();
+        $dataToStore = $oldData + $data;
+        $this->setJson($dataToStore);
+
+    }
+
+    /**
+     * Set json data
+     *
+     * @return void
+     * @throws \Exception if an error occurs during encoding
+     * @access public
+     */
+    public function setJson(array $data)
+    {
+        $content = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            throw new \Exception('Data can\'t be encoded to json format : ' . json_last_error_msg());
+        }
+        return $this->setAsString($content);
+    }
+
+    /**
+     * Set content into file
+     *
+     * @return void
+     * @access public
+     */
+    public function setAsString($string)
+    {
+        return file_put_contents($this->path, $string);
     }
 }
 

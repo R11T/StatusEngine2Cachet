@@ -49,9 +49,14 @@ try {
         case 'ping':
             $app->ping();
             break;
+        case 'synchronize':
+            $app->synchronize();
+            break;
         case 'help':
         default:
-            echo 'help !', "\n";
+            $actions = ['ping', 'synchronize', 'update'];
+            sort($actions);
+            echo 'Usage: {' . implode(', ', $actions) . '}', "\n";
     }
 } catch (\Exception $e) {
     echo $e->getMessage(), "\n";

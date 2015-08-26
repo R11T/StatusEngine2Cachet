@@ -25,21 +25,48 @@ class Http
         $configPath = CONFIG_DIR . 'config.json';
         $config = (new System\File($configPath))->getJson();
         $url = $config['urlAPI'] . 'ping';
-        $this->request($url);
+        $this->get($url);
     }
 
-    private function request($url)
+    /**
+     * Get all cachet components
+     *
+     * @access public
+     */
+    public function getComponentsList()
     {
-        $ch  = curl_init($url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $data = curl_exec($ch);
-        echo $data, "\n";
-        $info = curl_getinfo($ch);
-        print_r($info);
-        echo "\n";
-        curl_close($ch);
+        $configPath = CONFIG_DIR . 'config.json';
+        $config = (new System\File($configPath))->getJson();
+        $url    = $config['urlAPI'] . 'components';
+        $get    = $this->get($url);
+        return $get['data'];
+    }
+
+    /**
+     * Execute a GET curl request
+     *
+     * @return array
+     * @access private
+     */
+    private function get($url)
+    {
+        $response       = [];
+        $handler        = curl_init($url);
+        $defaultOptions = [
+            CURLOPT_URL            => $url,
+            CURLOPT_HEADER         => false,
+            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_RETURNTRANSFER => true,
+        ];
+        curl_setopt_array($handler, $defaultOptions);
+        $response['data']   = curl_exec($handler);
+
+        $response['info']   = curl_getinfo($handler);
+        $response['errNo']  = curl_errno($handler);
+        $response['errMes'] = curl_error($handler);
+        curl_close($handler);
+        return $response;
     }
 }
 
