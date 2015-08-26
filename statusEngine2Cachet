@@ -11,28 +11,6 @@
  * @link https://www.tldrlegal.com/l/gpl2
  * @see LICENSE file
  */
-
-// get
-// json post
-/*
-$data        = ["name" => "Hagrid", "age" => "36"];
-$data_string = json_encode($data);
-$ch          = curl_init($url);
-//echo curl_errno($ch), "\n";
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json', 
-            'Content-Length: ' . strlen($data_string)]
-);
-$data = curl_exec($ch);
-echo $data;
-$info = curl_getinfo($ch);
-print_r($info);
-echo "\n";
-curl_close($ch);
-*/
 $required = [
     'Const.php',
     'Vendor/autoload.php',
@@ -51,6 +29,9 @@ try {
             break;
         case 'synchronize':
             $app->synchronize();
+            break;
+        case 'update':
+            $app->update();
             break;
         case 'help':
         default:

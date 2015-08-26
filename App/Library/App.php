@@ -28,7 +28,7 @@ class App
     public function ping()
     {
         $http = new Http();
-        $http->ping();
+        print_r($http->ping());
     }
 
     /**
@@ -57,5 +57,22 @@ class App
             'associations' => $associations
         ];
         $configFile->storeData($toStore);
+    }
+
+    /**
+     * Update a cachet's component according to associated probes
+     *
+     * @return void
+     * @access public
+     */
+    public function update()
+    {
+        $id   = rand(1, 4);
+        $data = [
+            'status' => rand(1,4),
+        ];
+
+        $http = new Http();
+        print_r($http->putComponent($id, $data));
     }
 }
