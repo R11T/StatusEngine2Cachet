@@ -12,11 +12,13 @@
  */
 namespace App\Library;
 
+use \App\Model;
+
 /**
-* Main application
-*
-* @author Romain L.
-*/
+ * Main application
+ *
+ * @author Romain L.
+ */
 class App
 {
     /**
@@ -43,11 +45,10 @@ class App
         $associations = [];
         $toStore      = [];
         $http         = new Http();
-        $data         = $http->getComponentsList();
         $configPath   = CONFIG_DIR . 'config.json';
         $configFile   = new System\File($configPath);
-        $config       = $configFile->getJson();
-        $data         = json_decode($data, true);
+        $result       = $http->getComponentsList();
+        $data         = json_decode($result['data'], true);
         foreach ($data['data'] as $found) {
             $components[] = ['id' => $found['id'], 'label' => $found['name']];
             $associations[$found['id']] = [];
@@ -67,12 +68,93 @@ class App
      */
     public function update()
     {
-        $id   = rand(1, 4);
-        $data = [
-            'status' => rand(1,4),
-        ];
+        $configPath = CONFIG_DIR . 'config.json';
+        $configFile = new System\File($configPath);
+        $config     = $configFile->getJson();
 
-        $http = new Http();
-        print_r($http->putComponent($id, $data));
+        $components = $config['components'];
+        foreach ($config['components'] as $component) {
+            if (isset($config['associations'][$component['id']]) && !empty($config['associations'][$component['id']])) {
+                $result = $this->checkComponentAssociations($config['associations'][$component['id']], $config['resultFilePath']);
+                var_dump('result check', $component['label']);
+                print_r($result);
+                if ($result['alive'] === $result['total'] && 0 !== $result['alive']) {
+                    $data = [
+                        'status' => Model\Component::OPERATIONAL,
+                    ];
+                } elseif (0 === $result['alive'] && 0 !== $result['total']) {
+                    $data = [
+                        'status' => Model\Component::MAJOR_OUT,
+                    ];
+                } else {
+                    $data = [
+                        'status' => Model\Component::MAJOR_OUT,
+                    ];
+                }
+                $http = new Http();
+                print_r($http->putComponent($component['id'], $data));
+            }
+        }
+    }
+
+    /**
+     * Check all associations probes - components in order to guess component's general status
+     *
+     * @param array  $associations All associations of a given component
+     * @param string $resultFilePath
+     *
+     * @return array
+     * @access private
+     */
+    private function checkComponentAssociations(array $associations, $resultFilePath)
+    {
+        $probes2Components = ['alive' => 0, 'total' => 0];
+        foreach ($associations as $name) {
+            $probe = $this->findProbe($name, $resultFilePath);
+            if (!empty($probe)) {
+                if ($this->isProbeAlive($probe)) {
+                    ++$probes2Components['alive'];
+                }
+                ++$probes2Components['total'];
+            }
+        }
+        return $probes2Components;
+    }
+
+    /**
+     * Find a probe, given its name
+     *
+     * @param string $name
+     * @param string $resultFilePath
+     *
+     * @return array
+     * @access private
+     */
+    private function findProbe($name, $resultFilePath)
+    {
+        $resultFile = new System\File($resultFilePath);
+        $result     = $resultFile->getJson();
+        foreach ($result as $analyzable) {
+            foreach ($analyzable as $probeName => $probeData) {
+                if ($name === $probeName) {
+                    return $probeData;
+                }
+            }
+        }
+        return [];
+    }
+
+    /**
+     * Check if a probe is alive
+     *
+     * @return bool
+     * @access private
+     */
+    private function isProbeAlive(array $probe)
+    {
+        $max = max(array_keys($probe));
+        //return false;
+        return 0 === $probe[$max]['code'];
+
     }
 }

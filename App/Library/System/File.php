@@ -83,7 +83,7 @@ class File
     {
         $dataToStore = [];
         $oldData     = $this->getJson();
-        $dataToStore = $oldData + $data;
+        $dataToStore = array_merge($oldData, $data);
         $this->setJson($dataToStore);
 
     }
