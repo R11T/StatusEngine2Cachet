@@ -71,28 +71,24 @@ class App
         $configPath = CONFIG_DIR . 'config.json';
         $configFile = new System\File($configPath);
         $config     = $configFile->getJson();
+        $resultFile = new System\File($config['resultFilePath']);
+        $dataResult = $resultFile->getJson();
+        $http       = new Http();
 
-        $components = $config['components'];
-        foreach ($config['components'] as $component) {
-            if (isset($config['associations'][$component['id']]) && !empty($config['associations'][$component['id']])) {
-                $result = $this->checkComponentAssociations($config['associations'][$component['id']], $config['resultFilePath']);
-                var_dump('result check', $component['label']);
-                print_r($result);
-                if ($result['alive'] === $result['total'] && 0 !== $result['alive']) {
-                    $data = [
-                        'status' => Model\Component::OPERATIONAL,
-                    ];
-                } elseif (0 === $result['alive'] && 0 !== $result['total']) {
-                    $data = [
-                        'status' => Model\Component::MAJOR_OUT,
-                    ];
-                } else {
-                    $data = [
-                        'status' => Model\Component::MAJOR_OUT,
-                    ];
+        $components = json_decode($http->getComponentsList()['data'], true);
+        $toUpdate   = new Specification\ComponentToBeUpdatedSpecification();
+
+        foreach ($components['data'] as $dataComponent) {
+            $comp   = new Model\Component();
+            $comp->hydrate($dataComponent);
+            $compId = $comp->getId();
+
+            if (!empty($config['associations'][$compId])) {
+                $comp->associateProbes($config['associations'][$compId], $dataResult);
+                $comp->evaluateLevel();
+                if ($toUpdate->isSatisfiedBy($comp)) {
+                    print_r($http->putComponent($comp->getId(), $comp->getUpdProperties()));
                 }
-                $http = new Http();
-                print_r($http->putComponent($component['id'], $data));
             }
         }
     }
